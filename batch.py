@@ -2,6 +2,17 @@
 """Compute a batch of pairwise-dependencies.
 
 Intended to be called in a parallel computation script.
+
+EXAMPLE USES:
+------------------------------
+# All-pairs, single matrix.
+python batch.py fname=mymatrix.pkl start=100 end=200 computer=PCCComputer
+
+# All-pairs, dual matrix.
+python batch.py fname1=mymatrix1-colaligned1.pkl fname2=mymatrix2-colaligned1.pkl offset=0 computer=PCCCOmputer
+
+# All-pairs, single matrix, compute options
+python batch.py fname=mymatrix.pkl start=100 end=200 computer=MINEComputer compute_options=alpha:0.5,c:20
 """
 from compute_dependencies.computers import *
 from compute_dependencies import *
@@ -13,7 +24,7 @@ import sys, os
 def main(kwds):
   """Shell script wrapper."""
   if "compute_options" in kwds:
-    kwds["compute_options"] = dict([s.split('=') for s in kwds["compute_options"].split(',')])
+    kwds["compute_options"] = dict([s.split(':') for s in kwds["compute_options"].split(',')])
   outdir = kwds["outdir"]; del kwds["outdir"]
   assert os.path.exists(outdir) and os.path.isdir(outdir)
   
@@ -62,10 +73,11 @@ def all_pairs_one(M=None, computer=None, start=None, end=None, compute_options=N
 def all_pairs_two(M1=None, M2=None, computer=None, offset=None, compute_options=None):
   """Compute batch of all-pairs (rectangular) dependency matrix between two matrices."""
   assert M1 is not None and M2 is not None
+  assert np.size(M1,1) == np.size(M2,1)
   assert computer in COMPUTERS
   if compute_options is None: compute_options = {}
   n1, n2 = np.size(M1,0), np.size(M2,0)
-  assert n1 < n2 and offset < n1 and offset >= 0
+  assert offset < n1 and offset >= 0
   C = BatchComputer(COMPUTERS[computer](**compute_options), n2)
   for i in xrange(n2):
     x, y = intersect(M1[offset,:], M2[i,:])

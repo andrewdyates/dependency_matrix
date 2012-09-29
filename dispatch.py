@@ -3,7 +3,7 @@ from matrix_io import *
 from qsub import *
 
 
-def dispatch_all_pairs_one(fname):
+def dispatch_all_pairs_one(fname=None, k=None):
   pass
 
 def dispatch_all_pairs_two(fname1, fname2):
