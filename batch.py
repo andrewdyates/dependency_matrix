@@ -72,14 +72,6 @@ def all_pairs_two(M1=None, M2=None, computer=None, offset=None, compute_options=
     C.compute(x, y, i)
   return C
 
-def warn_nans(C, batchname):
-  n_nans = C.nans()
-  if n_nans > 0:
-    print "!WARNING: %d nans in computation batch %s." % (n_nans, batchname)
-    return True
-  else:
-    return False
-
 def intersect(x, y):
   if hasattr(x, 'mask'):
     x_mask = x.mask
