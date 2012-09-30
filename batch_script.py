@@ -102,8 +102,4 @@ def make_dir(outdir):
 
   
 if __name__ == "__main__":
-
-  if sys.argv[2] == "auto":
-    main(**dict([s.split('=') for s in sys.argv[2:]]))
-  else:
-    arg_parse_call()
+  arg_parse_call()

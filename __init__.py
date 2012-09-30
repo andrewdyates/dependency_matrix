@@ -51,12 +51,13 @@ def batch_self(M=None, computer=None, start=0, end=None, compute_options=None):
     end = max_i
   else:
     assert end <= max_i
-  size = end-start, 
+  size = end-start
   C = BatchComputer(COMPUTERS[computer](**compute_options), size)
   for i in xrange(size):
     xi, yi = inv_sym_idx(start+i, n)
     assert xi < n and yi < n and xi < yi and sym_idx(xi, yi, n) == start+i
     x, y = intersect(M[xi,:], M[yi,:])
+    print x, y
     C.compute(x, y, i)
   return C
 
@@ -91,6 +92,14 @@ def intersect(x, y):
     y_mask = y.mask
   else:
     y_mask = np.zeros(y.shape, dtype=np.bool)
-  join_mask = ~(~x_mask & ~y_mask)
-  return (x[join_mask], y[join_mask])
+  join_select = (~x_mask & ~y_mask)
+  if hasattr(x, 'mask'):
+    r_x = x[join_select].data
+  else:
+    r_x = x[join_select]
+  if hasattr(y, 'mask'):
+    r_y = y[join_select].data
+  else:
+    r_y = y[join_select]    
+  return (r_x, r_y)
 
