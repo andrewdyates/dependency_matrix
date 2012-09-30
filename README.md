@@ -1,4 +1,7 @@
-mapreduce_dependency_matrix
+dependency_matrix
 ===========================
 
-Compute all-pairs dependency matrices using Map Reduce.
+Compute all-pairs dependency matrices.
+
+
+  
