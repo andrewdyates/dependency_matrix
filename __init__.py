@@ -16,7 +16,7 @@ def make_batch(compute_options=None, **kwds):
     args.append('compute_options="%s"' % json.dumps(compute_options).replace('"','\"'))
   return "python %s %s" % (BATCH_SCRIPT_PATH, " ".join(args))
 
-def cmd_dispatch_self(fname=None, n=None, computer=None, compute_options=None, k=200000):
+def cmds_dispatch_self(fname=None, n=None, computer=None, compute_options=None, k=200000):
   """Return a list of batch commands to compute all-pairs dependency for one matrix."""
   assert fname and n > 0 and computer
   if compute_options is None: compute_options = {}
@@ -29,7 +29,7 @@ def cmd_dispatch_self(fname=None, n=None, computer=None, compute_options=None, k
     batches.append(make_batch(fname=fname, start=start, end=end, computer=computer, compute_options=compute_options))
   return batches
 
-def cmd_dispatch_dual(fname1=None, fname2=None, n2=None, computer=None, compute_options=None):
+def cmds_dispatch_dual(fname1=None, fname2=None, n2=None, computer=None, compute_options=None):
   """Return a list of batch commands to compute all-pairs dependency for two matrices."""
   assert fname1 and fname2 and n2 > 0 and computer
   if compute_options is None: compute_options = {}
@@ -38,7 +38,7 @@ def cmd_dispatch_dual(fname1=None, fname2=None, n2=None, computer=None, compute_
     batches.append(make_batch(fname1=fname1, fname2=fname2, offset=i, computer=computer, compute_options=compute_options))
   return batches
 
-def batch_self(M=None, computer=None, start=0, end=None, compute_options=None):
+def all_pairs_self(M=None, computer=None, start=0, end=None, compute_options=None):
   """Compute batch of all-pairs (upper triangle) dependency matrix in one matrix.
 
   Returns:
@@ -57,11 +57,10 @@ def batch_self(M=None, computer=None, start=0, end=None, compute_options=None):
     xi, yi = inv_sym_idx(start+i, n)
     assert xi < n and yi < n and xi < yi and sym_idx(xi, yi, n) == start+i
     x, y = intersect(M[xi,:], M[yi,:])
-    print x, y
     C.compute(x, y, i)
   return C
 
-def batch_dual(M1=None, M2=None, computer=None, offset=None, compute_options=None):
+def all_pairs_dual(M1=None, M2=None, computer=None, offset=None, compute_options=None):
   """Compute batch of all-pairs (rectangular) dependency matrix between two matrices.
 
   Returns:
@@ -78,28 +77,10 @@ def batch_dual(M1=None, M2=None, computer=None, offset=None, compute_options=Non
     C.compute(x, y, i)
   return C
 
-def intersect(x, y):
-  """Return x, y such that no dimension has a missing value.
 
-  Returns:
-    (x,y) np.array tuple with no missing values or mismatched dimensions
-  """
-  if hasattr(x, 'mask'):
-    x_mask = x.mask
-  else:
-    x_mask = np.zeros(x.shape, dtype=np.bool)
-  if hasattr(y, 'mask'):
-    y_mask = y.mask
-  else:
-    y_mask = np.zeros(y.shape, dtype=np.bool)
-  join_select = (~x_mask & ~y_mask)
-  if hasattr(x, 'mask'):
-    r_x = x[join_select].data
-  else:
-    r_x = x[join_select]
-  if hasattr(y, 'mask'):
-    r_y = y[join_select].data
-  else:
-    r_y = y[join_select]    
-  return (r_x, r_y)
-
+def make_dir(outdir):
+  try:
+    os.makedirs(outdir)
+  except OSError, e:
+    if e.errno != errno.EEXIST: raise
+  return outdir
