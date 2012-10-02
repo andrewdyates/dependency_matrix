@@ -1,13 +1,17 @@
 #!/usr/bin/python
 import numpy as np
 from compute_dependencies.computers import COMPUTERS
-from compute_dependencies import BatchComputer
+from compute_dependencies import *
 from py_symmetric_matrix import *
 import json
-import os
+import os, errno
 
 
 BATCH_SCRIPT_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "batch_script.py")
+def cmd_compile(*args, **kwds):
+  pass
+def cmd_jsonindex(*args, **kwds):
+  pass
 
 def make_batch(compute_options=None, **kwds):
   args = ["auto"]
@@ -16,7 +20,7 @@ def make_batch(compute_options=None, **kwds):
     args.append('compute_options="%s"' % json.dumps(compute_options).replace('"','\"'))
   return "python %s %s" % (BATCH_SCRIPT_PATH, " ".join(args))
 
-def cmds_dispatch_self(fname=None, n=None, computer=None, compute_options=None, k=200000):
+def cmds_dispatch_self(fname=None, n=None, computer=None, compute_options=None, k=100000):
   """Return a list of batch commands to compute all-pairs dependency for one matrix."""
   assert fname and n > 0 and computer
   if compute_options is None: compute_options = {}

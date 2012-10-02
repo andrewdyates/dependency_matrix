@@ -6,7 +6,6 @@ Saves files in outdir in pattern:
 from __init__ import *
 from compute_dependencies.computers import *
 from compute_dependencies import *
-import argparse
 import json
 from matrix_io import *
 import os, sys, errno
@@ -15,7 +14,7 @@ import re
 RX_SELF_BATCHNAME = re.compile("(?P<fname>[^_]+)_(?P<start>\d+)_(?P<end>\d+)_self")
 RX_DUAL_BATCHNAME = re.compile("(?P<fname1>[^_]+)_(?P<fname2>[^_]+)_(?P<offset>[^_]+)_dual")
 
-def fclean(s):
+def fclean(fname):
   return os.path.basename(fname).replace("_","-")
 
 def main(computer=None, compute_options=None, outdir=None, fname=None, start=None, end=None, fname1=None, fname2=None, offset=None):
@@ -28,7 +27,7 @@ def main(computer=None, compute_options=None, outdir=None, fname=None, start=Non
   if not os.path.exists(outdir):
     make_dir(outdir)
   assert os.path.exists(outdir) and os.path.isdir(outdir)
-  assert bool(fname) != (fname1 and fname2)
+  assert bool(fname) != bool(fname1 and fname2)
       
   # Single matrix
   if fname:
