@@ -1,27 +1,42 @@
 #!/usr/bin/python
+"""Functional modules to batch, distribute, and compile dependency matrix generation.
+
+NOTE: All computations are between rows of matrix. (row vectors)
+"""
 import numpy as np
 from compute_dependencies.computers import COMPUTERS
 from compute_dependencies import *
 from py_symmetric_matrix import *
+from util import *
 import json
-import os, errno
+import os
 
 
 BATCH_SCRIPT_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "batch_script.py")
-def cmd_compile(*args, **kwds):
+def shell_compile(*args, **kwds):
+  # TODO
   pass
-def cmd_jsonindex(*args, **kwds):
+def shell_jsonindex(*args, **kwds):
+  # TODO
   pass
 
-def make_batch(compute_options=None, **kwds):
-  args = ["auto"]
+def shell_batch(compute_options=None, **kwds):
+  """Return batch_script.py shell with parameters.
+
+  Returns:
+    str of shell command
+  """
   args = ["%s=%s"%(k,v) for k, v in kwds]
   if compute_options:
     args.append('compute_options="%s"' % json.dumps(compute_options).replace('"','\"'))
   return "python %s %s" % (BATCH_SCRIPT_PATH, " ".join(args))
 
-def cmds_dispatch_self(fname=None, n=None, computer=None, compute_options=None, k=100000):
-  """Return a list of batch commands to compute all-pairs dependency for one matrix."""
+def shells_dispatch_self(fname=None, n=None, computer=None, compute_options=None, k=100000):
+  """Return batch_script.py shells to compute all-pairs for one matrix.
+
+  Returns:
+    [str] of shell commands
+  """
   assert fname and n > 0 and computer
   if compute_options is None: compute_options = {}
   nn = n*(n-1)/2
@@ -30,19 +45,23 @@ def cmds_dispatch_self(fname=None, n=None, computer=None, compute_options=None, 
   for i in xrange(n_batches):
     start = i*k
     end = min(start+k, nn)
-    batches.append(make_batch(fname=fname, start=start, end=end, computer=computer, compute_options=compute_options))
+    batches.append(shell_batch(fname=fname, start=start, end=end, computer=computer, compute_options=compute_options))
   return batches
 
-def cmds_dispatch_dual(fname1=None, fname2=None, n2=None, computer=None, compute_options=None):
-  """Return a list of batch commands to compute all-pairs dependency for two matrices."""
+def shells_dispatch_dual(fname1=None, fname2=None, n2=None, computer=None, compute_options=None):
+  """Return batch_script.py shells to compute all-pairs between two matrices.
+
+  Returns:
+    [str] of shell commands
+  """
   assert fname1 and fname2 and n2 > 0 and computer
   if compute_options is None: compute_options = {}
   batches = []
   for i in xrange(n2):
-    batches.append(make_batch(fname1=fname1, fname2=fname2, offset=i, computer=computer, compute_options=compute_options))
+    batches.append(shell_batch(fname1=fname1, fname2=fname2, offset=i, computer=computer, compute_options=compute_options))
   return batches
 
-def all_pairs_self(M=None, computer=None, start=0, end=None, compute_options=None):
+def compute_self(M=None, computer=None, start=0, end=None, compute_options=None):
   """Compute batch of all-pairs (upper triangle) dependency matrix in one matrix.
 
   Returns:
@@ -64,7 +83,7 @@ def all_pairs_self(M=None, computer=None, start=0, end=None, compute_options=Non
     C.compute(x, y, i)
   return C
 
-def all_pairs_dual(M1=None, M2=None, computer=None, offset=None, compute_options=None):
+def compute_dual(M1=None, M2=None, computer=None, offset=None, compute_options=None):
   """Compute batch of all-pairs (rectangular) dependency matrix between two matrices.
 
   Returns:
@@ -81,10 +100,3 @@ def all_pairs_dual(M1=None, M2=None, computer=None, offset=None, compute_options
     C.compute(x, y, i)
   return C
 
-
-def make_dir(outdir):
-  try:
-    os.makedirs(outdir)
-  except OSError, e:
-    if e.errno != errno.EEXIST: raise
-  return outdir

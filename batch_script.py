@@ -42,7 +42,7 @@ def main(computer=None, compute_options=None, outdir=None, fname=None, start=Non
     else:
       end = int(end)
     batchname = "%s_%d_%d" % (fclean(fname), start, end)
-    C = all_pairs_self(M, computer, start, end, compute_options)
+    C = compute_self(M, computer, start, end, compute_options)
   # Dual matrices
   else:
     M1, M2 = load(fname1)["M"], load(fname2)["M"]
@@ -51,7 +51,7 @@ def main(computer=None, compute_options=None, outdir=None, fname=None, start=Non
       batchname = "%s_%s_%d" % (fclean(fname1), fclean(fname2), offset)
     else:
       batchname = "%s_%s_all"
-    C = all_pairs_dual(M1, M2, computer, offset, compute_options)
+    C = compute_dual(M1, M2, computer, offset, compute_options)
 
   assert RX_SELF_BATCHNAME.match(batchname) != RX_DUAL_BATCHNAME.match(batchname)
   n_nans = C.nans()
