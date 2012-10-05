@@ -2,6 +2,10 @@
 """Manual script for computing all-pairs dependency matrix batches.
 
 Saves files in outdir in pattern:
+  TODO
+
+EXAMPLE USE:
+time python /nfs/01/osu6683/recomb2013_workbench/dependency_matrix/batch_script.py computer=PCC fname2=/fs/lustre/osu6683/recomb2013_gse15745/dispatch_test/GSE15745_GPL8490.data.aligned.pkl fname1=/fs/lustre/osu6683/recomb2013_gse15745/dispatch_test/GSE15745_GPL6104.data.aligned.pkl offset=0 verbose=True
 """
 from __init__ import *
 from compute_dependencies.computers import *
@@ -17,7 +21,7 @@ RX_DUAL_BATCHNAME = re.compile("(?P<fname1>[^_]+)_(?P<fname2>[^_]+)_(?P<offset>[
 def fclean(fname):
   return os.path.basename(fname).replace("_","-")
 
-def main(computer=None, compute_options=None, outdir=None, fname=None, start=None, end=None, fname1=None, fname2=None, offset=None):
+def main(computer=None, compute_options=None, outdir=None, fname=None, start=None, end=None, fname1=None, fname2=None, offset=None, verbose=False):
   """Shell script wrapper."""
   assert computer in COMPUTERS.keys()
   if compute_options is not None:
@@ -42,7 +46,7 @@ def main(computer=None, compute_options=None, outdir=None, fname=None, start=Non
     else:
       end = int(end)
     batchname = "%s_%d_%d" % (fclean(fname), start, end)
-    C = compute_self(M, computer, start, end, compute_options)
+    C = compute_self(M, computer, start, end, compute_options, verbose)
   # Dual matrices
   else:
     M1, M2 = load(fname1)["M"], load(fname2)["M"]
@@ -51,7 +55,7 @@ def main(computer=None, compute_options=None, outdir=None, fname=None, start=Non
       batchname = "%s_%s_%d" % (fclean(fname1), fclean(fname2), offset)
     else:
       batchname = "%s_%s_all"
-    C = compute_dual(M1, M2, computer, offset, compute_options)
+    C = compute_dual(M1, M2, computer, offset, compute_options, verbose)
 
   assert RX_SELF_BATCHNAME.match(batchname) != RX_DUAL_BATCHNAME.match(batchname)
   n_nans = C.nans()

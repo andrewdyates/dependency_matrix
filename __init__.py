@@ -15,10 +15,11 @@ import os
 BATCH_SCRIPT_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "batch_script.py")
 def shell_compile(*args, **kwds):
   # TODO
-  pass
+  return "echo 'you should really write a compile script.'"
+
 def shell_jsonindex(*args, **kwds):
   # TODO
-  pass
+  return "echo 'you should really write a json script.'"
 
 def shell_batch(compute_options=None, **kwds):
   """Return batch_script.py shell with parameters.
@@ -26,7 +27,7 @@ def shell_batch(compute_options=None, **kwds):
   Returns:
     str of shell command
   """
-  args = ["%s=%s"%(k,v) for k, v in kwds]
+  args = ["%s=%s"%(k,v) for k, v in kwds.items()]
   if compute_options:
     args.append('compute_options="%s"' % json.dumps(compute_options).replace('"','\"'))
   return "python %s %s" % (BATCH_SCRIPT_PATH, " ".join(args))
@@ -61,7 +62,7 @@ def shells_dispatch_dual(fname1=None, fname2=None, n2=None, computer=None, compu
     batches.append(shell_batch(fname1=fname1, fname2=fname2, offset=i, computer=computer, compute_options=compute_options))
   return batches
 
-def compute_self(M=None, computer=None, start=0, end=None, compute_options=None):
+def compute_self(M=None, computer=None, start=0, end=None, compute_options=None, verbose=False):
   """Compute batch of all-pairs (upper triangle) dependency matrix in one matrix.
 
   Returns:
@@ -80,10 +81,12 @@ def compute_self(M=None, computer=None, start=0, end=None, compute_options=None)
     xi, yi = inv_sym_idx(start+i, n)
     assert xi < n and yi < n and xi < yi and sym_idx(xi, yi, n) == start+i
     x, y = intersect(M[xi,:], M[yi,:])
-    C.compute(x, y, i)
+    v = C.compute(x, y, i)
+    if verbose:
+      print i, v
   return C
 
-def compute_dual(M1=None, M2=None, computer=None, offset=None, compute_options=None):
+def compute_dual(M1=None, M2=None, computer=None, offset=None, compute_options=None, verbose=False):
   """Compute batch of all-pairs (rectangular) dependency matrix between two matrices.
 
   Returns:
@@ -97,6 +100,8 @@ def compute_dual(M1=None, M2=None, computer=None, offset=None, compute_options=N
   C = BatchComputer(COMPUTERS[computer](**compute_options), n2)
   for i in xrange(n2):
     x, y = intersect(M1[offset,:], M2[i,:])
-    C.compute(x, y, i)
+    v = C.compute(x, y, i)
+    if verbose:
+      print i, v
   return C
 
