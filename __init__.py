@@ -27,12 +27,12 @@ def shell_batch(compute_options=None, **kwds):
   Returns:
     str of shell command
   """
-  args = ["%s=%s"%(k,v) for k, v in kwds.items()]
+  args = ["%s=%s"%(k,v) for k, v in kwds.items() if v is not None]
   if compute_options:
     args.append('compute_options="%s"' % json.dumps(compute_options).replace('"','\"'))
   return "python %s %s" % (BATCH_SCRIPT_PATH, " ".join(args))
 
-def shells_dispatch_self(fname=None, n=None, computer=None, compute_options=None, k=100000):
+def shells_dispatch_self(fname=None, n=None, computer=None, compute_options=None, k=100000, outdir=None):
   """Return batch_script.py shells to compute all-pairs for one matrix.
 
   Returns:
@@ -46,10 +46,11 @@ def shells_dispatch_self(fname=None, n=None, computer=None, compute_options=None
   for i in xrange(n_batches):
     start = i*k
     end = min(start+k, nn)
-    batches.append(shell_batch(fname=fname, start=start, end=end, computer=computer, compute_options=compute_options))
+    line = shell_batch(fname=fname, start=start, end=end, computer=computer, compute_options=compute_options, outdir=outdir)
+    batches.append(line)
   return batches
 
-def shells_dispatch_dual(fname1=None, fname2=None, n2=None, computer=None, compute_options=None):
+def shells_dispatch_dual(fname1=None, fname2=None, n2=None, computer=None, compute_options=None, outdir=None):
   """Return batch_script.py shells to compute all-pairs between two matrices.
 
   Returns:
@@ -59,7 +60,8 @@ def shells_dispatch_dual(fname1=None, fname2=None, n2=None, computer=None, compu
   if compute_options is None: compute_options = {}
   batches = []
   for i in xrange(n2):
-    batches.append(shell_batch(fname1=fname1, fname2=fname2, offset=i, computer=computer, compute_options=compute_options))
+    cmd = shell_batch(fname1=fname1, fname2=fname2, offset=i, computer=computer, compute_options=compute_options, outdir=outdir)
+    batches.append(cmd)
   return batches
 
 def compute_self(M=None, computer=None, start=0, end=None, compute_options=None, verbose=False):
