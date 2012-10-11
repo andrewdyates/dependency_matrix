@@ -27,8 +27,6 @@ from matrix_io import *
 import os, sys, errno
 import re
 
-RX_SELF_BATCHNAME = re.compile("(?P<fname>[^_]+)_(?P<start>\d+)_(?P<end>\d+)_self")
-RX_DUAL_BATCHNAME = re.compile("(?P<fname1>[^_]+)_(?P<fname2>[^_]+)_(?P<offset>[^_]+)_dual")
 
 def fclean(fname):
   return os.path.basename(fname).replace("_","-")
