@@ -76,6 +76,7 @@ def main(fname=None, fname1=None, fname2=None, computers=None, outdir=None, n_no
     elif mtype == "dual":
       jobname = "%s_%s_%s" % (comp_name, bname(fname_work1), bname(fname_work2))
       Q = Qsub(jobname=jobname, n_nodes=n_nodes, n_ppn=n_ppn, hours=hours, work_dir=outdir)
+      # n1 is the number of rows in matrix 1
       cmds = shells_dispatch_dual(fname_work1, fname_work2, np.size(M1,0), comp_name, compute_options, outdir=comp_dir)
       Q.add_parallel(cmds)
 

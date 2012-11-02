@@ -1,8 +1,6 @@
 #!/usr/bin/python
 """Manual script for computing all-pairs dependency matrix batches.
 
-
-
 Saves files in outdir in pattern:
 
     [outdir]/[batchname].[computer.MNAME].npy
@@ -25,13 +23,12 @@ from compute_dependencies import *
 import json
 from matrix_io import *
 import os, sys, errno
-import re
 
 
 def fclean(fname):
   return os.path.basename(fname).replace("_","-")
 
-def main(computer=None, compute_options=None, outdir=None, fname=None, start=None, end=None, fname1=None, fname2=None, offset=None, verbose=False):
+def main(computer=None, compute_options=None, outdir=None, fname=None, start=None, end=None, fname1=None, fname2=None, offset=0, verbose=False, overwrite=False):
   """Shell script wrapper."""
   assert computer in COMPUTERS.keys()
   if compute_options is not None:
@@ -42,9 +39,13 @@ def main(computer=None, compute_options=None, outdir=None, fname=None, start=Non
     make_dir(outdir)
   assert os.path.exists(outdir) and os.path.isdir(outdir)
   assert bool(fname) != bool(fname1 and fname2)
-      
+  if fname is not None:
+    mtype = "self"
+  else:
+    mtype = "dual"
+
   # Single matrix
-  if fname:
+  if mtype == "self":
     M = load(fname)["M"]
     n = np.size(M,0)
     if start is None:
@@ -56,7 +57,7 @@ def main(computer=None, compute_options=None, outdir=None, fname=None, start=Non
     else:
       end = int(end)
     batchname = "%s_%d_%d_self" % (fclean(fname), start, end)
-    C = compute_self(M, computer, start, end, compute_options, verbose)
+    block_size = end-start
   # Dual matrices
   else:
     M1, M2 = load(fname1)["M"], load(fname2)["M"]
@@ -65,7 +66,23 @@ def main(computer=None, compute_options=None, outdir=None, fname=None, start=Non
       batchname = "%s_%s_%d_dual" % (fclean(fname1), fclean(fname2), offset)
     else:
       batchname = "%s_%s_all_dual"
-    C = compute_dual(M1, M2, computer, offset, compute_options, verbose)
+    block_size = np.size(M2, 0)
+    
+  # Construct BatchComputer object
+  C = get_computer(computer, block_size, compute_options)
+  # Check for overwrites
+  if not overwrite:
+    fnames = C.get_save_names(outdir, batchname).values()
+    if all([os.path.exists(s) for s in fnames]):
+      print "EXITING WITHOUT COMPUTATION: All files to be written exist, and overwrite flag is false:"
+      print ", ".join(fnames)
+      return
+  
+  # Run computation
+  if mtype == "self":
+    compute_self(M, C, start, block_size, verbose)
+  else:
+    compute_dual(M1, M2, C, offset, verbose)
 
   if verbose:
     print batchname
@@ -75,7 +92,7 @@ def main(computer=None, compute_options=None, outdir=None, fname=None, start=Non
   n_nans = C.nans()
   if n_nans > 0:
     print "!WARNING: %d nans in computation batch %s." % (n_nans, batchname)
-  outnames = C.save(outdir, batchname)
+  outnames = C.save(outdir, batchname, overwrite)
   print "Computed %d pairs over %d compute measures." % (C.n_computed, len(C.MNAMES))
   print "Saved: %s" % outnames
 
@@ -84,3 +101,6 @@ if __name__ == "__main__":
   kwds = dict([s.split('=') for s in sys.argv[1:]])
   print kwds
   main(**kwds)
+
+
+

@@ -69,21 +69,21 @@ def shells_dispatch_dual(fname1=None, fname2=None, n1=None, computer=None, compu
     batches.append(cmd)
   return batches
 
-def compute_self(M=None, computer=None, start=0, end=None, compute_options=None, verbose=False):
+def get_computer(computer, size, compute_options=None):
+  if compute_options is None:
+    compute_options = {}
+  C = BatchComputer(COMPUTERS[computer](**compute_options), size)
+  return C
+  
+def compute_self(M=None, C=None, start=0, size=1, verbose=False):
   """Compute batch of all-pairs (upper triangle) dependency matrix in one matrix.
 
   Returns:
     BatchComputer: obj all computed dependencies in this batch
+    or None if overwrite is True and all files that would have been saved exist
   """
-  if compute_options is None: compute_options = {}
+  assert C is not None and M is not None
   n = np.size(M,0)
-  max_i = n*(n-1)/2
-  if end is None:
-    end = max_i
-  else:
-    assert end <= max_i
-  size = end-start
-  C = BatchComputer(COMPUTERS[computer](**compute_options), size)
   for i in xrange(size):
     xi, yi = inv_sym_idx(start+i, n)
     assert xi < n and yi < n and xi < yi and sym_idx(xi, yi, n) == start+i
@@ -93,7 +93,7 @@ def compute_self(M=None, computer=None, start=0, end=None, compute_options=None,
       print i, v
   return C
 
-def compute_dual(M1=None, M2=None, computer=None, offset=None, compute_options=None, verbose=False):
+def compute_dual(M1=None, M2=None, C=None, offset=None, verbose=False):
   """Compute batch of all-pairs (rectangular) dependency matrix between two matrices.
   rows of M1 will correspond to ROWS of dependency matrix
   rows of M2 will correspond to COLUMNS of dependency matrix
@@ -101,13 +101,12 @@ def compute_dual(M1=None, M2=None, computer=None, offset=None, compute_options=N
 
   Returns:
     BatchComputer: obj all computed dependencies in this batch
+    or None if overwrite is True and all files that would have been saved exist.
   """
+  assert C is not None and M1 is not None and M2 is not None
   assert np.size(M1,1) == np.size(M2,1) # number of columns (samples) must be equal
-  if compute_options is None: compute_options = {}
-  
   n1, n2 = np.size(M1,0), np.size(M2,0)
   assert 0 <= offset and offset < n1
-  C = BatchComputer(COMPUTERS[computer](**compute_options), n2)
   # i corresponds to row in M2 and column per row `offset` in dependency matrix
   for i in xrange(n2):
     x, y = intersect(M1[offset,:], M2[i,:])
@@ -115,8 +114,6 @@ def compute_dual(M1=None, M2=None, computer=None, offset=None, compute_options=N
     if verbose:
       print i, v
   return C
-
-# compile functions
 
 
 class CompiledMatrix(object):
