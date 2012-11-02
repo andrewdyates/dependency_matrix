@@ -111,3 +111,13 @@ def compute_dual(M1=None, M2=None, computer=None, offset=None, compute_options=N
       print i, v
   return C
 
+# compile functions
+
+
+class CompiledMatrix(object):
+  def __init__(self, n, dtype=np.float):
+    assert n > 0
+    self.M = np.zeros(n, dtype=dtype)
+    self.B = np.zeros(n, dtype=np.bool)
+    self.n_set_total, self.n_dupe_total, self.n_nan_total = 0, 0, 0
+    self.Q_last = None
