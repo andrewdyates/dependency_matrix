@@ -2,7 +2,7 @@
 """Dispatch parallel job to compute dependency matrix.
 
 EXAMPLE USE:
-python $HOME/recomb2013_workbench/dependency_matrix/dispatch_script.py fname1=/fs/lustre/osu6683/recomb2013_gse15745/GSE15745_GPL6104.data.aligned.pkl fname2=/fs/lustre/osu6683/recomb2013_gse15745/GSE15745_GPL8490.data.aligned.pkl computers=[\"Dcor\",\"PCC\"] outdir=/fs/lustre/osu6683/recomb2013_gse15745/dispatch_test dry=True
+opython $HOME/recomb2013_workbench/dependency_matrix/dispatch_script.py fname1=/fs/lustre/osu6683/recomb2013_gse15745/GSE15745_GPL6104.data.aligned.pkl fname2=/fs/lustre/osu6683/recomb2013_gse15745/GSE15745_GPL8490.data.aligned.pkl computers=[\"Dcor\",\"PCC\"] outdir=/fs/lustre/osu6683/recomb2013_gse15745/dispatch_test dry=True
 """
 import datetime
 import random
@@ -31,7 +31,7 @@ def load_cp_and_make_bin(fname, outdir):
   return (M, fname_new)
 
 
-def main(fname=None, fname1=None, fname2=None, computers=None, outdir=None, n_nodes=1, n_ppn=1, hours=8, compute_options=None, dry=False):
+def main(fname=None, fname1=None, fname2=None, computers=None, outdir=None, n_nodes=1, n_ppn=12, hours=8, compute_options=None, dry=False):
 
   assert bool(fname) != bool(fname1 and fname2)
   if computers is None:
@@ -43,6 +43,9 @@ def main(fname=None, fname1=None, fname2=None, computers=None, outdir=None, n_no
   if not os.path.exists(outdir):
     make_dir(outdir)
     print "Created outdir %s" % outdir
+  n_ppn = int(n_ppn)
+  n_nodes = int(n_nodes)
+  hours = int(hours)
   assert n_nodes >= 1
   assert n_ppn >= 1 and n_ppn <= 12
   assert hours >= 1 and hours <= 99
@@ -53,11 +56,13 @@ def main(fname=None, fname1=None, fname2=None, computers=None, outdir=None, n_no
     mtype = "self"
     assert os.path.exists(fname)
     M, fname_work = load_cp_and_make_bin(fname, outdir)
+    print "Dispatching self dependency matrix computation."
   else:
     mtype = "dual"
     assert os.path.exists(fname1) and os.path.exists(fname2)
     M1, fname_work1 = load_cp_and_make_bin(fname1, outdir)
     M2, fname_work2 = load_cp_and_make_bin(fname2, outdir)
+    print "Dispatching dual dependency matrix computation."
 
   pids = []
   for comp_name in computers:
