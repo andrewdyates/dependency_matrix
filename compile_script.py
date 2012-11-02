@@ -3,7 +3,7 @@
 
 SAMPLE USE:
 DUAL
-  python $HOME/dependency_matrix/compile_script.py compile_dir=/fs/lustre/osu6683/gse15745_nov2/dependency_dispatch/PCC outdir=/fs/lustre/osu6683/gse15745_nov2 n_rows=10277 n_cols=24334
+python $HOME/dependency_matrix/compile_script.py compile_dir=/fs/lustre/osu6683/gse15745_nov2/dependency_dispatch/PCC outdir=/fs/lustre/osu6683/gse15745_nov2/testPCC_compile n_rows=24334 n_cols=10277 mtype=dual
   
 > dim(meth.M.Data.aligned)
 [1] 24334   420
@@ -26,7 +26,7 @@ import numpy as np
 
 
 def main(compile_dir=None, outdir=None, n_rows=None, n_cols=None, mtype="self", dtype=np.float32):
-  assert os.path.exists(compile_dir) and os.path.exists(outdir)
+  assert os.path.exists(compile_dir) 
   if isinstance(dtype, int):
     if dtype == "32":
       dtype = np.float32
@@ -40,8 +40,13 @@ def main(compile_dir=None, outdir=None, n_rows=None, n_cols=None, mtype="self", 
     if n_cols:
       print "WARNING: n_cols not used for mtype=self"
     assert n_rows is not None
+    n_rows = int(n_rows)
   else:
     assert n_cols is not None and n_rows is not None
+    n_cols, n_rows = int(n_cols), int(n_rows)
+  if not os.path.exists(outdir):
+    make_dir(outdir)
+    print "Created outdir %s" % outdir
 
   if mtype == "self":
     n = n_rows*(n_rows-1)/2
@@ -61,26 +66,37 @@ def main(compile_dir=None, outdir=None, n_rows=None, n_cols=None, mtype="self", 
       print "Creating new Result matrix '%s' of size %d, type %s, %s form." \
           % (matrix_name, n, str(dtype), mtype)
       Results[matrix_name] = CompiledMatrix(n=n, dtype=dtype)
-      R = Results[matrix_name]
+    R = Results[matrix_name]
       
     # Get CompiledMatrix index depending on matrix type
     if mtype == "self":
       m = RX_SELF_BATCHNAME.match(batch_name)
       start = int(m.group('start'))
       end = int(m.group('end'))
+      this_batch_fname = m.group('fname')
     else:
       m = RX_DUAL_BATCHNAME.match(batch_name)
-      start = int(m.group('offset'))
+      start = int(m.group('offset')) * n_cols
       end = start + n_cols
+      this_batch_fname = "%s_%s" % (m.group('fname1'), m.group('fname2'))
+      
     if batch_fname is None:
-      batch_fname = m.group('fname')
+      batch_fname = this_batch_fname
     else:
-      if batch_fname != m.group('fname'):
+      if batch_fname != this_batch_fname:
         print "WARNING! batch_fname's in compile_dir %s do not match. Expected batch_fname: '%s', got '%s'. SKIPPING %s !" \
             % (compile_dir, batch_fname, m.group('fname'), fname)
         continue
 
-    Q = pickle.load(open(fname))
+    ext = fname.rpartition('.')[2]
+    fpath = os.path.join(compile_dir, fname)
+    if ext == "npy":
+      Q = np.load(fpath)
+    elif ext == "pkl":
+      Q = pickle.load(open(os.path.join(compile_dir, fname)))
+    else:
+      print "Unknown file extension '%s' of file path %s. Cannot load. Exiting." % (ext, fpath)
+      sys.exit(1)
     # Check to make sure that Q is not the same as last Q for this Result matrix.
     if R.Q_last is not None:
       try:
@@ -92,13 +108,15 @@ def main(compile_dir=None, outdir=None, n_rows=None, n_cols=None, mtype="self", 
 
     # Populate CompiledMatrix with this matrix segment
     n_set, n_dupe, n_nan = 0, 0, 0
-    for i, x in enumerate(range(start, end)):
+    assert end-start == len(Q), "Q is wrong size. Expect %d, got %d." % \
+        (len(Q), end-start)
+    for i, x in enumerate(xrange(start, end)):
       R.M[x] = Q[i]
       if np.isnan(Q[i]):
         # Implicit: B[x] = 0
         n_nan += 1
       elif not R.B[x]:
-        R.B[x] = 1
+        R.B[x] = True
         n_set += 1
       else:
         n_dupe += 1
@@ -116,17 +134,14 @@ def main(compile_dir=None, outdir=None, n_rows=None, n_cols=None, mtype="self", 
     print "Saving CompiledMatrix for matrix %s..." % (matrix_name)
     print "%.2f%% Matrix Compilation. Set %d (%d dupes, %d nan, %d unmasked) from %s. Expected %d." % \
         (R.n_set_total/n*100, R.n_set_total, R.n_dupe_total, R.n_nan_total, np.sum(R.B), compile_dir, n)
-
-    # TODO! set outpath_prefix. base on batchname?
     M_fname = "%s.%s.values.pkl" % (batch_fname, matrix_name)
     B_fname = "%s.%s.isset.pkl" % (batch_fname, matrix_name)
 
-    # Reshape dual matrices back into a rectangle
     if mtype == "self":
-      pickle.dump(M_fname, open(M_fname, "w"), protocol=-1)
+      pickle.dump(R.M, open(M_fname, "w"), protocol=-1)
     else:
       print "Reshaped matrix from %d vector to (%d, %d) matrix. " % (n, n_rows, n_cols)
-      pickle.dump(M_fname.reshape(n_rows, n_cols), open(M_fname, "w"), protocol=-1)
+      pickle.dump(R.M.reshape(n_rows, n_cols), open(M_fname, "w"), protocol=-1)
 
     print "Saved %s." % (M_fname)
     if R.n_set_total != n:

@@ -15,11 +15,18 @@ import os
 RX_SELF_BATCHNAME = re.compile("(?P<fname>[^_]+)_(?P<start>\d+)_(?P<end>\d+)_self")
 RX_DUAL_BATCHNAME = re.compile("(?P<fname1>[^_]+)_(?P<fname2>[^_]+)_(?P<offset>[^_]+)_dual")
 
-
 BATCH_SCRIPT_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "batch_script.py")
-def shell_compile(*args, **kwds):
-  # TODO
-  return "echo 'you should really write a compile script.'"
+COMPILE_SCRIPT_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "compile_script.py")
+
+def shell_compile(**kwds):
+  """Compile directory of dependency matrix fragments.
+
+  EXAMPLE:
+    python $HOME/dependency_matrix/compile_script.py compile_dir=/fs/lustre/osu6683/gse15745_nov2/dependency_dispatch/PCC outdir=/fs/lustre/osu6683/gse15745_nov2/testPCC_compile n_rows=24334 n_cols=10277 mtype=dual
+  """
+  assert len(set('compile_dir', 'outdir', 'n_rows', 'n_cols', 'mtype') & set(kwds.keys())) == len(kwds)
+  args = ["%s=%s"%(k,v) for k, v in kwds.items() if v is not None]
+  return "python %s %s" % (COMPILE_SCRIPT_PATH, " ".join(args))
 
 def shell_jsonindex(*args, **kwds):
   # TODO
