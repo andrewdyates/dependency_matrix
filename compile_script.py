@@ -2,10 +2,13 @@
 """Compile batch dependency matrix fragments into one dependency matrix.
 
 SAMPLE USE:
-
-
 DUAL
-  python $HOME/dependency_matrix/compile_script.py compile_dir=/fs/lustre/osu6683/gse15745_nov2/dependency_dispatch/PCC outdir=/fs/lustre/osu6683/gse15745_nov2 n_rows=X n_cols=Y
+  python $HOME/dependency_matrix/compile_script.py compile_dir=/fs/lustre/osu6683/gse15745_nov2/dependency_dispatch/PCC outdir=/fs/lustre/osu6683/gse15745_nov2 n_rows=10277 n_cols=24334
+  
+> dim(meth.M.Data.aligned)
+[1] 24334   420
+> dim(mrna.M.Data.aligned)
+[1] 10277   420
 """
 # filename RX:
 #   from compute_dependencies/__init__.py:

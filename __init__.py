@@ -54,16 +54,17 @@ def shells_dispatch_self(fname=None, n=None, computer=None, compute_options=None
     batches.append(line)
   return batches
 
-def shells_dispatch_dual(fname1=None, fname2=None, n2=None, computer=None, compute_options=None, outdir=None):
+def shells_dispatch_dual(fname1=None, fname2=None, n1=None, computer=None, compute_options=None, outdir=None):
   """Return batch_script.py shells to compute all-pairs between two matrices.
 
   Returns:
     [str] of shell commands
   """
-  assert fname1 and fname2 and n2 > 0 and computer
+  assert fname1 and fname2 and n1 > 0 and computer
   if compute_options is None: compute_options = {}
   batches = []
-  for i in xrange(n2):
+  # loop over each ROW of M1
+  for i in xrange(n1): 
     cmd = shell_batch(fname1=fname1, fname2=fname2, offset=i, computer=computer, compute_options=compute_options, outdir=outdir)
     batches.append(cmd)
   return batches
@@ -94,16 +95,20 @@ def compute_self(M=None, computer=None, start=0, end=None, compute_options=None,
 
 def compute_dual(M1=None, M2=None, computer=None, offset=None, compute_options=None, verbose=False):
   """Compute batch of all-pairs (rectangular) dependency matrix between two matrices.
+  rows of M1 will correspond to ROWS of dependency matrix
+  rows of M2 will correspond to COLUMNS of dependency matrix
+  `offset` corresponds to row in M1 and thus row in final dependency matrix
 
   Returns:
     BatchComputer: obj all computed dependencies in this batch
   """
-  assert np.size(M1,1) == np.size(M2,1)
+  assert np.size(M1,1) == np.size(M2,1) # number of columns (samples) must be equal
   if compute_options is None: compute_options = {}
   
   n1, n2 = np.size(M1,0), np.size(M2,0)
   assert 0 <= offset and offset < n1
   C = BatchComputer(COMPUTERS[computer](**compute_options), n2)
+  # i corresponds to row in M2 and column per row `offset` in dependency matrix
   for i in xrange(n2):
     x, y = intersect(M1[offset,:], M2[i,:])
     v = C.compute(x, y, i)
