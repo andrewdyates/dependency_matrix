@@ -134,8 +134,8 @@ def main(compile_dir=None, outdir=None, n_rows=None, n_cols=None, mtype="self", 
     print "Saving CompiledMatrix for matrix %s..." % (matrix_name)
     print "%.2f%% Matrix Compilation. Set %d (%d dupes, %d nan, %d unmasked) from %s. Expected %d." % \
         (R.n_set_total/n*100, R.n_set_total, R.n_dupe_total, R.n_nan_total, np.sum(R.B), compile_dir, n)
-    M_fname = "%s.%s.values.pkl" % (batch_fname, matrix_name)
-    B_fname = "%s.%s.isset.pkl" % (batch_fname, matrix_name)
+    M_fname = os.path.join(outdir, "%s.%s.values.pkl" % (batch_fname, matrix_name))
+    B_fname = os.path.join(outdir, "%s.%s.isset.pkl" % (batch_fname, matrix_name))
 
     if mtype == "self":
       pickle.dump(R.M, open(M_fname, "w"), protocol=-1)
