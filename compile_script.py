@@ -1,4 +1,5 @@
 #!/usr/bin/python
+from future import __division__
 """Compile batch dependency matrix fragments into one dependency matrix.
 
 SAMPLE USE:

@@ -2,7 +2,8 @@
 """Dispatch parallel job to compute dependency matrix.
 
 EXAMPLE USE:
-opython $HOME/recomb2013_workbench/dependency_matrix/dispatch_script.py fname1=/fs/lustre/osu6683/recomb2013_gse15745/GSE15745_GPL6104.data.aligned.pkl fname2=/fs/lustre/osu6683/recomb2013_gse15745/GSE15745_GPL8490.data.aligned.pkl computers=[\"Dcor\",\"PCC\"] outdir=/fs/lustre/osu6683/recomb2013_gse15745/dispatch_test dry=True
+python $HOME/dependency_matrix/dispatch_script.py fname1=$HOME/gse15745_aligned_matrices_nov2/Methyl_correct_aligned.tab fname2=$HOME/gse15745_aligned_matrices_nov2/mRNA_correct_aligned.tab computers=[\"Cov\"] outdir=/fs/lustre/osu6683/gse15745_nov2/dependency_dispatch n_nodes=10 n_ppn=12 hours=10
+
 """
 import datetime
 import random
