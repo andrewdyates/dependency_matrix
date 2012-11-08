@@ -28,6 +28,9 @@ def shell_compile(**kwds):
   args = ["%s=%s"%(k,v) for k, v in kwds.items() if v is not None]
   return "python %s %s" % (COMPILE_SCRIPT_PATH, " ".join(args))
 
+def jsonindex_outname(exelog_fname):
+  return exelog_fname.rpartition('.')[0]+'.json'
+
 def shell_jsonindex(*args, **kwds):
   # TODO
   return "echo 'you should really write a json script.'"

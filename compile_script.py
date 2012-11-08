@@ -5,11 +5,6 @@ from __future__ import division
 SAMPLE USE:
 DUAL
 python $HOME/dependency_matrix/compile_script.py compile_dir=/fs/lustre/osu6683/gse15745_nov2/dependency_dispatch/PCC outdir=/fs/lustre/osu6683/gse15745_nov2/testPCC_compile n_rows=24334 n_cols=10277 mtype=dual
-  
-> dim(meth.M.Data.aligned)
-[1] 24334   420
-> dim(mrna.M.Data.aligned)
-[1] 10277   420
 """
 # filename RX:
 #   from compute_dependencies/__init__.py:
@@ -47,7 +42,7 @@ def main(compile_dir=None, outdir=None, n_rows=None, n_cols=None, mtype="self", 
     n_cols, n_rows = int(n_cols), int(n_rows)
   if not os.path.exists(outdir):
     make_dir(outdir)
-    print "Created outdir %s" % outdir
+    print "Created compiled outdir %s" % outdir
 
   if mtype == "self":
     n = n_rows*(n_rows-1)/2
@@ -150,8 +145,9 @@ def main(compile_dir=None, outdir=None, n_rows=None, n_cols=None, mtype="self", 
       print "!!! Because values are missing, saved %s." % (B_fname)
     else:
       print "No values missing; did not save boolean 'isset' matrix."
-
+      
   print "Compilation of %s complete. Saved %d result matrices." % (compile_dir, len(Results))
+
 
 
   

@@ -2,7 +2,16 @@
 """Dispatch parallel job to compute dependency matrix.
 
 EXAMPLE USE:
-python $HOME/dependency_matrix/dispatch_script.py fname1=$HOME/gse15745_aligned_matrices_nov2/Methyl_correct_aligned.tab fname2=$HOME/gse15745_aligned_matrices_nov2/mRNA_correct_aligned.tab computers=[\"Cov\", \"PCC\"] outdir=/fs/lustre/osu6683/gse15745_nov2/dependency_dispatch n_nodes=10 n_ppn=12 hours=10
+python $HOME/pymod/dependency_matrix/dispatch_script.py fname1=$HOME/gse15745_aligned_matrices_nov2/Methyl_correct_aligned.tab fname2=$HOME/gse15745_aligned_matrices_nov2/mRNA_correct_aligned.tab computers=[\"Cov\", \"PCC\"] outdir=/fs/lustre/osu6683/gse15745_nov2/dependency_dispatch n_nodes=10 n_ppn=12 hours=10
+
+at the end of JSON compile,
+  what matrices correspond to what computations?
+  where can this information be found?
+
+[
+{'computer': 'Dcor', 'name': 'DCOR', 'values': '/abspath/M.pkl', 'mask': '/abspath/B.pkl'},
+{'computer': 'Dcor', 'name': 'COV', 'values': '/abspath/M.pkl'},
+]
 """
 import datetime
 import random
@@ -32,7 +41,6 @@ def load_cp_and_make_bin(fname, outdir):
 
 
 def main(fname=None, fname1=None, fname2=None, computers=None, outdir=None, n_nodes=1, n_ppn=12, hours=8, compute_options=None, dry=False):
-
   assert bool(fname) != bool(fname1 and fname2)
   if computers is None:
     computers = COMPUTERS.keys()
@@ -50,7 +58,20 @@ def main(fname=None, fname1=None, fname2=None, computers=None, outdir=None, n_no
   assert n_ppn >= 1 and n_ppn <= 12
   assert hours >= 1 and hours <= 99
   os.chdir(outdir)
-  compiled_dir = os.path.join(outdir, "compiled")
+  compiled_dir = os.path.join(outdir, "compiled_dep_matrices")
+  
+  # Write job submission report in compiled_dir.
+  if not os.path.exists(compiled_dir):
+    make_dir(compiled_dir)
+    print "Created compiled outdir %s" % outdir
+  now_timestamp = datetime.datetime.now().isoformat('_')
+  run_report_fname = os.path.join(compiled_dir, "run_report_%s.txt" % ts)
+  exelog_fname = os.path.join(compiled_dir, "exe_log_%s.txt" % ts)
+  exelog_fname_json = jsonindex_outname(exelog_fname)
+  fp = open(run_report_fname, 'w')
+  fp.write("locals: "); fp.write(str(locals())); fp.write('\n')
+  fp.close()
+  print "Wrote dispatch script execution log to %s." % (run_report_fname)
 
   if fname:
     mtype = "self"
@@ -89,7 +110,7 @@ def main(fname=None, fname1=None, fname2=None, computers=None, outdir=None, n_no
     print Q.script()
     print "Submitted dispatch, job ID: %s" % pid
     Q = Qsub(jobname="comp_"+jobname, n_nodes=1, n_ppn=1, hours=4, work_dir=outdir, after_jobids=[pid], email=True)
-    cmd = shell_compile(compile_dir=comp_dir, outdir=outdir, n_rows=n_rows, n_cols=n_cols, mtype=mtype)
+    cmd = shell_compile(compile_dir=comp_dir, outdir=compiled_dir, n_rows=n_rows, n_cols=n_cols, mtype=mtype, exelog_fname=exelog_fname)
     Q.add(cmd)
     comp_pid = Q.submit(dry)
     print Q.script()
@@ -98,11 +119,14 @@ def main(fname=None, fname1=None, fname2=None, computers=None, outdir=None, n_no
 
   # After all jobs have completed, compile .json job and send email on completion.
   Q = Qsub(jobname="%s_JSONCompile"%(jobname), work_dir=outdir, email=True, after_jobids=pids)
-  Q.add(shell_jsonindex(compiled_dir, comp_dir, mtype))
+  Q.add(shell_jsonindex(exelog_fname))
   print Q.script()
   pid = Q.submit(dry)
+  print "Final execution log file path: %s" % (exelog_fname_json)
   print "Final PID: %s" % pid
-  return pid
+  r = {'pid': pid, 'exelog_fname_json': exelog_fname_json}
+  print "Return value: %s" % r
+  return r
 
 
 if __name__ == "__main__":
