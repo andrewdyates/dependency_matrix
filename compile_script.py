@@ -5,6 +5,10 @@ from __future__ import division
 SAMPLE USE:
 DUAL
 python $HOME/dependency_matrix/compile_script.py compile_dir=/fs/lustre/osu6683/gse15745_nov2/dependency_dispatch/PCC outdir=/fs/lustre/osu6683/gse15745_nov2/testPCC_compile n_rows=24334 n_cols=10277 mtype=dual
+
+Writes to exec log (if provided) in lines like:
+{'computer': 'Dcor', 'name': 'DCOR', 'values': '/abspath/M.pkl', 'mask': '/abspath/B.pkl'},
+{'computer': 'Dcor', 'name': 'COV', 'values': '/abspath/M.pkl'},
 """
 # filename RX:
 #   from compute_dependencies/__init__.py:
@@ -21,7 +25,7 @@ import cPickle as pickle
 import numpy as np
 
 
-def main(compile_dir=None, outdir=None, n_rows=None, n_cols=None, mtype="self", dtype=np.float32):
+def main(compile_dir=None, outdir=None, n_rows=None, n_cols=None, mtype="self", dtype=np.float32, exelog_fp=None):
   assert os.path.exists(compile_dir) 
   if isinstance(dtype, int):
     if dtype == "32":
@@ -126,6 +130,9 @@ def main(compile_dir=None, outdir=None, n_rows=None, n_cols=None, mtype="self", 
     R.n_nan_total += n_nan
 
   # Save CompiledMatrix for each result.
+  if exelog_fp is not None:
+    if isinstance(exelog_fp, basestring):
+      exelog_fp = open(exelog_fp, 'a')
   for matrix_name, R in Results.items():
     print "Saving CompiledMatrix for matrix %s..." % (matrix_name)
     print "%.2f%% Matrix Compilation. Set %d (%d dupes, %d nan, %d unmasked) from %s. Expected %d." % \
@@ -133,6 +140,7 @@ def main(compile_dir=None, outdir=None, n_rows=None, n_cols=None, mtype="self", 
     M_fname = os.path.join(outdir, "%s.%s.values.pkl" % (batch_fname, matrix_name))
     B_fname = os.path.join(outdir, "%s.%s.isset.pkl" % (batch_fname, matrix_name))
 
+    logline = "'name': '%s', 'mtype': '%s', 'values': '%s'" % (matrix_name, mtype, M_fname)
     if mtype == "self":
       pickle.dump(R.M, open(M_fname, "w"), protocol=-1)
     else:
@@ -143,11 +151,15 @@ def main(compile_dir=None, outdir=None, n_rows=None, n_cols=None, mtype="self", 
     if R.n_set_total != n:
       pickle.dump(R.B, open(B_fname, "w"), protocol=-1)
       print "!!! Because values are missing, saved %s." % (B_fname)
+      logline = logline + ", 'missing': '%s'" % (B_fname)
     else:
       print "No values missing; did not save boolean 'isset' matrix."
+    if exelog_fp:
+      exelog_fp.write(logline+'\n')
       
   print "Compilation of %s complete. Saved %d result matrices." % (compile_dir, len(Results))
-
+  if exelog_fp:
+    exelog_fp.close()
 
 
   

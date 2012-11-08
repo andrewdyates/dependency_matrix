@@ -3,15 +3,6 @@
 
 EXAMPLE USE:
 python $HOME/pymod/dependency_matrix/dispatch_script.py fname1=$HOME/gse15745_aligned_matrices_nov2/Methyl_correct_aligned.tab fname2=$HOME/gse15745_aligned_matrices_nov2/mRNA_correct_aligned.tab computers=[\"Cov\", \"PCC\"] outdir=/fs/lustre/osu6683/gse15745_nov2/dependency_dispatch n_nodes=10 n_ppn=12 hours=10
-
-at the end of JSON compile,
-  what matrices correspond to what computations?
-  where can this information be found?
-
-[
-{'computer': 'Dcor', 'name': 'DCOR', 'values': '/abspath/M.pkl', 'mask': '/abspath/B.pkl'},
-{'computer': 'Dcor', 'name': 'COV', 'values': '/abspath/M.pkl'},
-]
 """
 import datetime
 import random
@@ -65,8 +56,8 @@ def main(fname=None, fname1=None, fname2=None, computers=None, outdir=None, n_no
     make_dir(compiled_dir)
     print "Created compiled outdir %s" % outdir
   now_timestamp = datetime.datetime.now().isoformat('_')
-  run_report_fname = os.path.join(compiled_dir, "run_report_%s.txt" % ts)
-  exelog_fname = os.path.join(compiled_dir, "exe_log_%s.txt" % ts)
+  run_report_fname = os.path.join(compiled_dir, "run_report_%s.txt" % now_timestamp)
+  exelog_fname = os.path.join(compiled_dir, "exe_log_%s.txt" % now_timestamp)
   exelog_fname_json = jsonindex_outname(exelog_fname)
   fp = open(run_report_fname, 'w')
   fp.write("locals: "); fp.write(str(locals())); fp.write('\n')
@@ -110,7 +101,7 @@ def main(fname=None, fname1=None, fname2=None, computers=None, outdir=None, n_no
     print Q.script()
     print "Submitted dispatch, job ID: %s" % pid
     Q = Qsub(jobname="comp_"+jobname, n_nodes=1, n_ppn=1, hours=4, work_dir=outdir, after_jobids=[pid], email=True)
-    cmd = shell_compile(compile_dir=comp_dir, outdir=compiled_dir, n_rows=n_rows, n_cols=n_cols, mtype=mtype, exelog_fname=exelog_fname)
+    cmd = shell_compile(compile_dir=comp_dir, outdir=compiled_dir, n_rows=n_rows, n_cols=n_cols, mtype=mtype, exelog_fp=exelog_fname)
     Q.add(cmd)
     comp_pid = Q.submit(dry)
     print Q.script()
@@ -124,9 +115,7 @@ def main(fname=None, fname1=None, fname2=None, computers=None, outdir=None, n_no
   pid = Q.submit(dry)
   print "Final execution log file path: %s" % (exelog_fname_json)
   print "Final PID: %s" % pid
-  r = {'pid': pid, 'exelog_fname_json': exelog_fname_json}
-  print "Return value: %s" % r
-  return r
+  return {'pid': pid, 'exelog_fname_json': exelog_fname_json}
 
 
 if __name__ == "__main__":

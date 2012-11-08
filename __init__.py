@@ -17,6 +17,7 @@ RX_DUAL_BATCHNAME = re.compile("(?P<fname1>[^_]+)_(?P<fname2>[^_]+)_(?P<offset>[
 
 BATCH_SCRIPT_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "batch_script.py")
 COMPILE_SCRIPT_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "compile_script.py")
+JSONINDEX_SCRIPT_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "jsonindex_script.py")
 
 def shell_compile(**kwds):
   """Compile directory of dependency matrix fragments.
@@ -32,8 +33,9 @@ def jsonindex_outname(exelog_fname):
   return exelog_fname.rpartition('.')[0]+'.json'
 
 def shell_jsonindex(*args, **kwds):
-  # TODO
-  return "echo 'you should really write a json script.'"
+  assert 'exelog_fname' in kwds
+  args = ["%s=%s"%(k,v) for k, v in kwds.items() if v is not None]
+  return "python %s %s" % (JSONINDEX_SCRIPT_PATH, " ".join(args))
 
 def shell_batch(compute_options=None, **kwds):
   """Return batch_script.py shell with parameters.
