@@ -8,10 +8,10 @@ def main(exelog_fname=None):
   exelog_fname_json = jsonindex_outname(exelog_fname)
   print "Converting txt file %s to JSON %s..." % (exelog_fname, exelog_fname_json)
   fp = open(exelog_fname_json, 'w')
+  lines = ["{%s}"%line.rstrip('\n\r') for line in open(exelog_fname)]
   fp.write("[\n")
-  for line in open(exelog_fname):
-    fp.write(line)
-  fp.write("]\n")
+  fp.write(',\n'.join(lines))
+  fp.write("\n]\n")
   fp.close()
   print "Deleting %s ..." % (exelog_fname)
   os.remove(exelog_fname)
