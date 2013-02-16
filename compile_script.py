@@ -140,7 +140,7 @@ def main(compile_dir=None, outdir=None, n_rows=None, n_cols=None, mtype="self", 
     M_fname = os.path.join(outdir, "%s.%s.values.pkl" % (batch_fname, matrix_name))
     B_fname = os.path.join(outdir, "%s.%s.isset.pkl" % (batch_fname, matrix_name))
 
-    logline = "'name': '%s', 'mtype': '%s', 'values': '%s'" % (matrix_name, mtype, M_fname)
+    logline = '"name": "%s", "mtype": "%s", "values": "%s"' % (matrix_name, mtype, M_fname)
     if mtype == "self":
       pickle.dump(R.M, open(M_fname, "w"), protocol=-1)
     else:
@@ -151,7 +151,7 @@ def main(compile_dir=None, outdir=None, n_rows=None, n_cols=None, mtype="self", 
     if R.n_set_total != n:
       pickle.dump(R.B, open(B_fname, "w"), protocol=-1)
       print "!!! Because values are missing, saved %s." % (B_fname)
-      logline = logline + ", 'missing': '%s'" % (B_fname)
+      logline = logline + ', "missing": "%s"' % (B_fname)
     else:
       print "No values missing; did not save boolean 'isset' matrix."
     if exelog_fp:
