@@ -1,7 +1,7 @@
 dependency_matrix
 ===========================
 
-Compute all-pairs dependency matrices.
+Compute all-pairs dependency matrices. Also supports permutation testing.
 
 Depends on modules:
 
