@@ -1,0 +1,7 @@
+[
+{"name": "STD_PRODUCT", "mtype": "dual", "values": "/fs/lustre/osu6683/gse15745_feb/all_aligned_dual/compiled_dep_matrices/gibbs.meth.all.aligned.psb.corr.feb-15-2013.pkl_gibbs.mrna.all.aligned.psb.corr.feb-15-2013.pkl.STD_PRODUCT.values.pkl"},
+{"name": "COVARIANCE", "mtype": "dual", "values": "/fs/lustre/osu6683/gse15745_feb/all_aligned_dual/compiled_dep_matrices/gibbs.meth.all.aligned.psb.corr.feb-15-2013.pkl_gibbs.mrna.all.aligned.psb.corr.feb-15-2013.pkl.COVARIANCE.values.pkl"},
+{"name": "MIN_STD", "mtype": "dual", "values": "/fs/lustre/osu6683/gse15745_feb/all_aligned_dual/compiled_dep_matrices/gibbs.meth.all.aligned.psb.corr.feb-15-2013.pkl_gibbs.mrna.all.aligned.psb.corr.feb-15-2013.pkl.MIN_STD.values.pkl"},
+{"name": "PEARSON", "mtype": "dual", "values": "/fs/lustre/osu6683/gse15745_feb/all_aligned_dual/compiled_dep_matrices/gibbs.meth.all.aligned.psb.corr.feb-15-2013.pkl_gibbs.mrna.all.aligned.psb.corr.feb-15-2013.pkl.PEARSON.values.pkl"},
+{"name": "PEARSON_PV", "mtype": "dual", "values": "/fs/lustre/osu6683/gse15745_feb/all_aligned_dual/compiled_dep_matrices/gibbs.meth.all.aligned.psb.corr.feb-15-2013.pkl_gibbs.mrna.all.aligned.psb.corr.feb-15-2013.pkl.PEARSON_PV.values.pkl"}
+]
