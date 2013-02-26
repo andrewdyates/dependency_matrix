@@ -7,10 +7,9 @@ import numpy as np
 from compute_dependencies.computers import COMPUTERS
 from compute_dependencies import *
 from py_symmetric_matrix import *
+from matrix_io import *
 from util import *
-import json
-import os
-
+import json, os, re, shutil
 
 RX_SELF_BATCHNAME = re.compile("(?P<fname>[^_]+)_(?P<start>\d+)_(?P<end>\d+)_self")
 RX_DUAL_BATCHNAME = re.compile("(?P<fname1>[^_]+)_(?P<fname2>[^_]+)_(?P<offset>[^_]+)_dual")
@@ -18,6 +17,28 @@ RX_DUAL_BATCHNAME = re.compile("(?P<fname1>[^_]+)_(?P<fname2>[^_]+)_(?P<offset>[
 BATCH_SCRIPT_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "batch_script.py")
 COMPILE_SCRIPT_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "compile_script.py")
 JSONINDEX_SCRIPT_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "jsonindex_script.py")
+PERM_COMPILE_SCRIPT_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "permutation_test_compile_script.py")
+
+bname = os.path.basename
+
+def load_cp_and_make_bin(fname, outdir):
+  """Load Copy and Make Binary.
+    Load a matrix from file. If that file is not a binary (i.e., it is plain text),
+      save a copy of it in `outdir` as a binary.
+    If the file is not loaded from outdir, and a copy does not yet exist in outdir, copy it there.
+  """
+  d = load(fname)
+  M, ftype = d["M"], d["ftype"]
+  if ftype != "pkl":
+    fname_new = os.path.join(outdir, bname(fname.rpartition('.')[0])+".pkl")
+    save(M, fname_new)
+    print "Saved binary copy of matrix %s as %s" % (fname, fname_new)
+  else:
+    fname_new = os.path.join(outdir, bname(fname))
+    if os.path.abspath(fname) != os.path.abspath(fname_new) and not os.path.exists(fname_new):
+      print "Matrix is not in out directory %s. Copying to %s" % (outdir, fname_new)
+      shutil.copy(fname, fname_new)
+  return (M, fname_new)
 
 def shell_compile(**kwds):
   """Compile directory of dependency matrix fragments.
@@ -34,6 +55,9 @@ def jsonindex_outname(exelog_fname):
 
 def shell_jsonindex(exelog_fname):
   return "python %s exelog_fname=%s" % (JSONINDEX_SCRIPT_PATH, exelog_fname)
+
+def shell_permutation_compile(json_fnames, out_fname):
+  return "python %s jsons=%s out_fname=%s" % (PERM_COMPILE_SCRIPT_PATH, ",".join(json_fnames), out_fname)
 
 def shell_batch(compute_options=None, **kwds):
   """Return batch_script.py shell with parameters.

@@ -14,23 +14,10 @@ from qsub import *
 import json
 import shutil
 import sys
-
+import os
 
 bname = os.path.basename
 K = 100000
-def load_cp_and_make_bin(fname, outdir):
-  d = load(fname)
-  M, ftype = d["M"], d["ftype"]
-  if ftype != "pkl":
-    fname_new = os.path.join(outdir, bname(fname.rpartition('.')[0])+".pkl")
-    save(M, fname_new)
-    print "Saved binary copy of matrix %s as %s" % (fname, fname_new)
-  else:
-    fname_new = os.path.join(outdir, bname(fname))
-    if os.path.abspath(fname) != os.path.abspath(fname_new) and not os.path.exists(fname_new):
-      print "Matrix is not in out directory %s. Copying to %s" % (outdir, fname_new)
-      shutil.copy(fname, fname_new)
-  return (M, fname_new)
 
 
 def main(fname=None, fname1=None, fname2=None, computers=None, outdir=None, n_nodes=1, n_ppn=12, hours=8, compute_options=None, dry=False):
@@ -56,7 +43,7 @@ def main(fname=None, fname1=None, fname2=None, computers=None, outdir=None, n_no
   # Write job submission report in compiled_dir.
   if not os.path.exists(compiled_dir):
     make_dir(compiled_dir)
-    print "Created compiled outdir %s" % outdir
+    print "Created directory for results in outdir: %s" % compiled_dir
   now_timestamp = datetime.datetime.now().isoformat('_')
   run_report_fname = os.path.join(compiled_dir, "run_report_%s.txt" % now_timestamp)
   exelog_fname = os.path.join(compiled_dir, "exe_log_%s.txt" % now_timestamp)
