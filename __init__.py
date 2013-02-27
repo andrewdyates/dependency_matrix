@@ -3,6 +3,7 @@
 
 NOTE: All computations are between rows of matrix. (row vectors)
 """
+from __future__ import division
 import numpy as np
 from compute_dependencies.computers import COMPUTERS
 from compute_dependencies import *
@@ -10,6 +11,7 @@ from py_symmetric_matrix import *
 from matrix_io import *
 from util import *
 import json, os, re, shutil
+
 
 RX_SELF_BATCHNAME = re.compile("(?P<fname>[^_]+)_(?P<start>\d+)_(?P<end>\d+)_self")
 RX_DUAL_BATCHNAME = re.compile("(?P<fname1>[^_]+)_(?P<fname2>[^_]+)_(?P<offset>[^_]+)_dual")
@@ -79,11 +81,11 @@ def shells_dispatch_self(fname=None, n=None, computer=None, compute_options=None
   assert fname and n > 0 and computer
   if compute_options is None: compute_options = {}
   nn = n*(n-1)/2
-  n_batches = k//nn+1
+  n_batches = int(np.ceil(nn/k))
   batches = []
   for i in xrange(n_batches):
-    start = i*k
-    end = min(start+k, nn)
+    start = i*k # from zero
+    end = min(start+k, nn) # num elements; -1 last element index
     line = shell_batch(fname=fname, start=start, end=end, computer=computer, compute_options=compute_options, outdir=outdir)
     batches.append(line)
   return batches
