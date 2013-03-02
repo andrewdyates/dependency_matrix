@@ -82,7 +82,7 @@ def shells_dispatch_self(fname=None, n=None, computer=None, compute_options=None
   """
   assert fname and n > 0 and computer
   if compute_options is None: compute_options = {}
-  nn = n*(n-1)/2
+  nn = int(n*(n-1)/2)
   n_batches = int(np.ceil(nn/k))
   batches = []
   for i in xrange(n_batches):

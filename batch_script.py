@@ -55,7 +55,7 @@ def main(computer=None, compute_options=None, outdir=None, fname=None, start=Non
     if end is None:
       end = n*(n-1)/2
     else:
-      end = int(end)
+      end = int(end.rpartition('.')[0])
     batchname = "%s_%d_%d_self" % (fclean(fname), start, end)
     block_size = end-start
   # Dual matrices
