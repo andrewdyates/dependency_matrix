@@ -102,9 +102,10 @@ def main(compile_dir=None, outdir=None, n_rows=None, n_cols=None, mtype="self", 
       try:
         assert np.size(Q) != np.size(R.Q_last) or np.abs(np.sum(Q - R.Q_last)) > 0
       except AssertionError:
-        print "Matrix segment seems repeated..."
+        print "WARNING: Matrix segment seems repeated..."
         print fname, Q[:5], R.Q_last[:5], (Q-R.Q_last)[:5], np.sum(Q-R.Q_last)
-        raise
+        # Don't break. Just report and continue
+        # raise
 
     # Populate CompiledMatrix with this matrix segment
     n_set, n_dupe, n_nan = 0, 0, 0
@@ -154,6 +155,11 @@ def main(compile_dir=None, outdir=None, n_rows=None, n_cols=None, mtype="self", 
       logline = logline + ', "missing": "%s"' % (B_fname)
     else:
       print "No values missing; did not save boolean 'isset' matrix."
+      print "Boolean matrix is excluded from output log."
+      if os.path.exists(B_fname):
+        print "WARNING: %s already exists, perhaps from a previous computation?" % B_fname
+        print "DELETING OLD %s" % B_fname
+        os.remove(B_fname)
     if exelog_fp:
       exelog_fp.write(logline+'\n')
       
