@@ -19,7 +19,7 @@ RX_DUAL_BATCHNAME = re.compile("(?P<fname1>[^_]+)_(?P<fname2>[^_]+)_(?P<offset>[
 BATCH_SCRIPT_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "batch_script.py")
 COMPILE_SCRIPT_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "compile_script.py")
 JSONINDEX_SCRIPT_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "jsonindex_script.py")
-PERM_COMPILE_SCRIPT_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "permutation_test_compile_script.py")
+REPORT_SCRIPT_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "dependency_matrix_report.py")
 
 bname = os.path.basename
 
@@ -59,7 +59,9 @@ def shell_jsonindex(exelog_fname):
   return "python %s exelog_fname=%s" % (JSONINDEX_SCRIPT_PATH, exelog_fname)
 
 def shell_permutation_compile(json_fnames, out_fname):
-  return "python %s jsons=%s out_fname=%s" % (PERM_COMPILE_SCRIPT_PATH, ",".join(json_fnames), out_fname)
+  return "python %s jsons=%s out_fname=%s" % (REPORT_SCRIPT_PATH, ",".join(json_fnames), out_fname)
+def shell_report_dependency_matrix(json_fname, out_fname):
+  return shell_permutation_compile([json_fname], out_fname)
 
 def shell_batch(compute_options=None, **kwds):
   """Return batch_script.py shell with parameters.

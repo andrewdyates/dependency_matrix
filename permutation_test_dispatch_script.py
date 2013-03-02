@@ -97,8 +97,11 @@ def main(n_permutes=1, fname=None, fname1=None, fname2=None, outdir=None, dry=Fa
     jobname = "PERM_COMP_" + bname(fname)
   else:
     jobname = "PERM_COMP_" + bname(fname1) + ":" + bname(fname2)
-    
-  Q = Qsub(jobname=jobname, n_nodes=1, n_ppn=12, hours=4, work_dir=outdir, email=True, after_jobids=PIDs)
+
+  # Generate redundant report after all permutations complete.
+  ## TODO: report should combine reports for all permutations rather than simply repeating
+  ##   reports for each matrix
+  Q = Qsub(jobname=jobname, n_nodes=1, n_ppn=12, hours=1, work_dir=outdir, email=True, after_jobids=PIDs)
   cmd = shell_permutation_compile(json_fnames=JSONs, out_fname=out_fname)
   Q.add(cmd)
   pid = Q.submit(dry)
