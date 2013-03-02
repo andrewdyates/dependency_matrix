@@ -37,6 +37,8 @@ def main(jsons="", out_fname=None):
         isset_mask = np.array(B)
         mask = nan_mask|(~isset_mask)
         print >> out, "%d total masked values (%d nans, %d missing)" % (np.sum(mask), np.sum(nan_mask), np.sum(~isset_mask))
+      else:
+        mask = nan_mask
       Q=np.array(M[~mask], dtype=np.float)
       print >> out, "np.sum(Q)", np.sum(Q)
       print >> out, "np.size(Q)", np.size(Q)
