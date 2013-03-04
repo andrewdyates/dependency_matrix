@@ -53,9 +53,13 @@ def main(computer=None, compute_options=None, outdir=None, fname=None, start=Non
     else:
       start = int(start)
     if end is None:
-      end = n*(n-1)/2
+      end = int(n*(n-1)/2)
     else:
-      end = int(end.rpartition('.')[0])
+      s = end.rpartition('.')
+      if s[0]:
+        end = int(s[0])
+      else:
+        end = int(s[2])
     batchname = "%s_%d_%d_self" % (fclean(fname), start, end)
     block_size = end-start
   # Dual matrices
