@@ -35,6 +35,18 @@ def load_cp_and_make_bin(fname, outdir):
     fname_new = os.path.join(outdir, bname(fname.rpartition('.')[0])+".pkl")
     save(M, fname_new)
     print "Saved binary copy of matrix %s as %s" % (fname, fname_new)
+    if 'row_ids' in d:
+      fname_rowids = fname_new.rpartition('.')[0]+".rowIDs.txt"
+      fp = open(fname_rowids, "w")
+      for s in d['row_ids']: fp.write("%s\n"%s)
+      fp.close()
+      print "Wrote row_ids in row order to %s." % fname_rowids
+    if 'col_ids' in d:
+      fname_colids = fname_new.rpartition('.')[0]+".colIDs.txt"
+      fp = open(fname_colids, "w")
+      for s in d['col_ids']: fp.write("%s\n"%s)
+      fp.close()
+      print "Wrote col_ids in col order to %s." % fname_colids
   else:
     fname_new = os.path.join(outdir, bname(fname))
     if os.path.abspath(fname) != os.path.abspath(fname_new) and not os.path.exists(fname_new):
