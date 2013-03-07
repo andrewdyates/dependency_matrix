@@ -28,30 +28,38 @@ def load_cp_and_make_bin(fname, outdir):
     Load a matrix from file. If that file is not a binary (i.e., it is plain text),
       save a copy of it in `outdir` as a binary.
     If the file is not loaded from outdir, and a copy does not yet exist in outdir, copy it there.
+    If the expected copy of the file already exists, then use that, and don't recreate the copy.
+    Thus, to reconstruct a copy, delete that copy first.
   """
   d = load(fname)
   M, ftype = d["M"], d["ftype"]
   if ftype != "pkl":
     fname_new = os.path.join(outdir, bname(fname.rpartition('.')[0])+".pkl")
-    save(M, fname_new)
-    print "Saved binary copy of matrix %s as %s" % (fname, fname_new)
+    if os.path.exists(fname_new):
+      print "Binary copy of matrix %s exists as %s. Load this copy. Do not overwrite." % \
+          (fname, fname_new)
+    else:
+      save(M, fname_new, row_ids=d.get('row_ids', None), col_ids=d.get('col_ids', None))
+      print "Saved binary copy of matrix %s as %s as matrix_io dict." % (fname, fname_new)
     if 'row_ids' in d:
       fname_rowids = fname_new.rpartition('.')[0]+".rowIDs.txt"
       fp = open(fname_rowids, "w")
       for s in d['row_ids']: fp.write("%s\n"%s)
       fp.close()
-      print "Wrote row_ids in row order to %s." % fname_rowids
+      print "Wrote row_ids in row order to plain text file %s." % fname_rowids
     if 'col_ids' in d:
       fname_colids = fname_new.rpartition('.')[0]+".colIDs.txt"
       fp = open(fname_colids, "w")
       for s in d['col_ids']: fp.write("%s\n"%s)
       fp.close()
-      print "Wrote col_ids in col order to %s." % fname_colids
+      print "Wrote col_ids in col order to plain text file %s." % fname_colids
   else:
     fname_new = os.path.join(outdir, bname(fname))
     if os.path.abspath(fname) != os.path.abspath(fname_new) and not os.path.exists(fname_new):
       print "Matrix is not in out directory %s. Copying to %s" % (outdir, fname_new)
       shutil.copy(fname, fname_new)
+    else:
+      print "Expected matrix copy path equals loaded matrix path. Do not overwrite."
   return (M, fname_new)
 
 def shell_compile(**kwds):
