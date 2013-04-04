@@ -1,10 +1,13 @@
 #!/usr/bin/python
 """Permute rows of matrix before dispatching. On computation completion, generate report.
 
-Shells Calls similar to dispatch_script.py
+NOTE: This script ONLY computes permutation tests. It does not dispatch actual,
+unpermutated computations.
 
 EXAMPLE:
   $ python $HOME/pymod/dependency_matrix/permutation_test_dispatch_script.py n_permutes=2 fname=$HOME/gibbs_feb16_cleaned_data/gibbs.mrna.all.psb.corr.feb-15-2013.tab computers=[\"PCC\"] outdir=/fs/lustre/osu6683/gse15745_feb/all_mrna_perm_test n_nodes=10 n_ppn=12 hours=6
+
+  python $HOME/Dropbox/biostat/git_repos/dependency_matrix/permutation_test_dispatch_script.py n_permutes=1 fname=$HOME/Dropbox/biostat/git_repos/dependency_matrix/test/M.pkl computers=[\"PCC\"] outdir=$HOME/Dropbox/biostat/git_repos/dependency_matrix/test n_nodes=1 n_ppn=12 hours=1 dry=True
 """
 import random
 import numpy as np
@@ -21,7 +24,7 @@ def permute_rows(M, seed=True):
     random.seed()
   for i in xrange(np.size(M,0)):
     try:
-      M.mask
+      assert M.mask
     except AttributeError:
       random.shuffle(M[i,:])
     else:
@@ -44,8 +47,9 @@ def main(n_permutes=1, fname=None, fname1=None, fname2=None, outdir=None, dry=Fa
     print "Created outdir %s" % outdir
   os.chdir(outdir)
 
-  now_timestamp = datetime.datetime.now().isoformat('_')
-  out_fname = os.path.join(outdir, "permute%d_report.%s.txt" % (n_permutes, now_timestamp))
+  # We don't compile an all-permutations report, so don't compute these variables.
+  ## now_timestamp = datetime.datetime.now().isoformat('_')
+  ## out_fname = os.path.join(outdir, "permute%d_report.%s.txt" % (n_permutes, now_timestamp))
 
   if fname:
     mtype = "self"
@@ -94,22 +98,30 @@ def main(n_permutes=1, fname=None, fname1=None, fname2=None, outdir=None, dry=Fa
   ## Given expected results from dispatcher, dispatch permutation report generator
   ##   to be executed after all dispatched permutations complete.
   if mtype == "self":
-    jobname = "PERM_COMP_" + bname(fname)
+    jobname = "END_PERM_COMP_" + bname(fname)
   else:
-    jobname = "PERM_COMP_" + bname(fname1) + ":" + bname(fname2)
+    jobname = "END_PERM_COMP_" + bname(fname1) + ":" + bname(fname2)
 
   # Generate redundant report after all permutations complete.
   ## TODO: report should combine reports for all permutations rather than simply repeating
+  # ----------------------------------------
   ##   reports for each matrix
-  Q = Qsub(jobname=jobname, n_nodes=1, n_ppn=12, hours=1, work_dir=outdir, email=True, after_jobids=PIDs)
-  cmd = shell_permutation_compile(json_fnames=JSONs, out_fname=out_fname)
-  Q.add(cmd)
+  # Q = Qsub(jobname=jobname, n_nodes=1, n_ppn=12, hours=1, work_dir=outdir, email=True, after_jobids=PIDs)
+  # cmd = shell_permutation_compile(json_fnames=JSONs, out_fname=out_fname)
+  # Q.add(cmd)
+  # pid = Q.submit(dry)
+  # print Q.script()
+  # print "Final permutation PID: %s" % pid
+  # return pid
+  # ----------------------------------------
+  ## In liu of the this function, simply create a capping dummy job to report status completion.
+  Q = Qsub(jobname=jobname, n_nodes=1, n_ppn=1, hours=1, work_dir=outdir, email=True, after_jobids=PIDs)
+  Q.echo("Jobs complete for %s" % jobname)
   pid = Q.submit(dry)
   print Q.script()
   print "Final permutation PID: %s" % pid
   return pid
 
-      
 if __name__ == "__main__":
   argv = dict([s.split('=') for s in sys.argv[1:]])
   print argv
