@@ -103,7 +103,7 @@ def main(fname=None, fname1=None, fname2=None, computers=None, outdir=None, n_no
   print Q.script()
   json_pid = Q.submit(dry)
 
-  report_fname = os.path.join(outdir, "%s_report.%s.txt" % (jobname, now_timestamp))
+  report_fname = os.path.join(outdir, "DEP_REPORT.%s.%s.txt" % (jobname, now_timestamp))
   print "EXPECTED REPORT FILE PATH for jobname [%s]: %s" % (jobname, report_fname)
   print
   Q = Qsub(jobname=jobname, n_nodes=1, n_ppn=12, hours=1, work_dir=outdir, email=True, after_jobids=json_pid)
