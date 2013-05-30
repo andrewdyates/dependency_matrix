@@ -2,7 +2,7 @@
 """Dispatch parallel job to compute dependency matrix.
 
 EXAMPLE USE:
-python $HOME/pymod/dependency_matrix/dispatch_script.py fname1=$HOME/gse15745_aligned_matrices_nov2/Methyl_correct_aligned.tab fname2=$HOME/gse15745_aligned_matrices_nov2/mRNA_correct_aligned.tab computers=[\"Cov\", \"PCC\"] outdir=/fs/lustre/osu6683/gse15745_nov2/dependency_dispatch n_nodes=10 n_ppn=12 hours=10
+python $HOME/pymod/dependency_matrix/dispatch_script.py fname1=$HOME/gse15745_aligned_matrices_nov2/Methyl_correct_aligned.tab fname2=$HOME/gse15745_aligned_matrices_nov2/mRNA_correct_aligned.tab computers=[\"Cov\",\"PCC\"] outdir=/fs/lustre/osu6683/gse15745_nov2/dependency_dispatch n_nodes=10 n_ppn=12 hours=10
 
 python $HOME/pymod/dependency_matrix/dispatch_script.py fname1=$HOME/gse15745_nov2012_experiments/gse15745_aligned_matrices_nov2/Methyl_correct_aligned.tab fname2=$HOME/gse15745_nov2012_experiments/gse15745_aligned_matrices_nov2/mRNA_correct_aligned.tab computers=[\"MINE\"] outdir=/fs/lustre/osu6683/gse15745_nov2/dependency_dispatch n_nodes=20 n_ppn=12 hours=48
 """
@@ -27,7 +27,7 @@ def main(fname=None, fname1=None, fname2=None, computers=None, outdir=None, n_no
   else:
     if isinstance(computers, basestring):
       computers = json.loads(computers)
-    assert not set(computers) - set(COMPUTERS.keys())
+    assert not set(computers) - set(COMPUTERS.keys()), "Some computer in [%s] not recognized. Allowed computers: [%s]" % (", ".join(sorted(set(computers))), ", ".join(sorted(COMPUTERS.keys())))
   if not os.path.exists(outdir):
     make_dir(outdir)
     print "Created outdir %s" % outdir

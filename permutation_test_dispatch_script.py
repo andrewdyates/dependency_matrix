@@ -22,10 +22,9 @@ def permute_rows(M, seed=True):
   """Randomly permute values in rows of M. Preserve masks. Permutes in place."""
   if seed:
     random.seed()
+  has_mask = hasattr(M, 'mask')
   for i in xrange(np.size(M,0)):
-    try:
-      assert M.mask
-    except AttributeError:
+    if not has_mask:
       random.shuffle(M[i,:])
     else:
       n_masked = np.sum(M[i,:].mask)
