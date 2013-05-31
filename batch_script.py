@@ -105,6 +105,3 @@ if __name__ == "__main__":
   kwds = dict([s.split('=') for s in sys.argv[1:]])
   print kwds
   main(**kwds)
-
-
-

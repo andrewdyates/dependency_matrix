@@ -115,7 +115,7 @@ def main(fname=None, fname1=None, fname2=None, computers=None, outdir=None, n_no
   print "Final execution log file path: %s" % (exelog_fname_json)
   print "Final PID: %s" % report_pid
   print "Final report fname: %s" % report_fname
-  return {'pid': report_pid, 'exelog_fname_json': exelog_fname_json, 'report_fname': report_fname}
+  return {'pid': report_pid, 'exelog_fname_json': os.path.abspath(exelog_fname_json), 'report_fname': report_fname}
 
 
 if __name__ == "__main__":

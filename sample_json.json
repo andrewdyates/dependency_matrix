@@ -1,0 +1,6 @@
+[
+{"name": "DCOR", "mtype": "self", "values": "/nfs/01/osu6683/brca/GSE31448_dep/compiled_dep_matrices/GSE31448.SCAN.pkl.DCOR.values.pkl"},
+{"name": "DCOV", "mtype": "self", "values": "/nfs/01/osu6683/brca/GSE31448_dep/compiled_dep_matrices/GSE31448.SCAN.pkl.DCOV.values.pkl"},
+{"name": "PEARSON", "mtype": "self", "values": "/nfs/01/osu6683/brca/GSE31448_dep/compiled_dep_matrices/GSE31448.SCAN.pkl.PEARSON.values.pkl"},
+{"name": "PEARSON_PV", "mtype": "self", "values": "/nfs/01/osu6683/brca/GSE31448_dep/compiled_dep_matrices/GSE31448.SCAN.pkl.PEARSON_PV.values.pkl"}
+]
