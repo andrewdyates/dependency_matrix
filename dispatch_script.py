@@ -37,8 +37,8 @@ def main(fname=None, fname1=None, fname2=None, computers=None, outdir=None, n_no
   n_nodes = int(n_nodes)
   hours = int(hours)
   assert n_nodes >= 1
-  assert n_ppn >= 1 and n_ppn <= 12
-  assert hours >= 1 and hours <= 99
+  assert n_ppn >= 1 and n_ppn <= SYS_MAX_PPN
+  assert hours >= 1
   os.chdir(outdir)
   compiled_dir = os.path.join(outdir, "compiled_dep_matrices")
   
@@ -108,7 +108,7 @@ def main(fname=None, fname1=None, fname2=None, computers=None, outdir=None, n_no
   report_fname = os.path.join(outdir, "DEP_REPORT.%s.%s.txt" % (jobname, now_timestamp))
   print "EXPECTED REPORT FILE PATH for jobname [%s]: %s" % (jobname, report_fname)
   print
-  Q = Qsub(jobname=jobname, n_nodes=1, n_ppn=12, hours=1, work_dir=outdir, email=True, after_jobids=json_pid)
+  Q = Qsub(jobname=jobname, n_nodes=1, n_ppn="max", hours=1, work_dir=outdir, email=True, after_jobids=json_pid)
   cmd = shell_report_dependency_matrix(json_fname=exelog_fname_json, out_fname=report_fname)
   Q.add(cmd)
   print Q.script()
