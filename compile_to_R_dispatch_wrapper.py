@@ -24,7 +24,7 @@ def main(**kwds):
     raise Exception, "No matrix filenames fname or (fname1, fname2)"
     
   cmd = "time python %(script)s fname=%(fname)s row_fname=%(row_fname)s col_fname=%(col_fname)s outdir=%(outdir)s" % {'script':WRAPPER_FNAME, 'fname':fname, 'row_fname':row_fname, 'col_fname':col_fname, 'outdir':kwds['outdir']}
-  Q = qsub.Qsub(hours=12, n_ppn=8, jobname="toR_%s"%pid)
+  Q = qsub.Qsub(hours=24, n_ppn=8, jobname="toR_%s"%pid)
   Q.add(cmd)
   pid = Q.submit(dry)
   print Q.script()
