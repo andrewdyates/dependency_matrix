@@ -1,6 +1,7 @@
 #!/usr/bin/python
 import json
-from pkl_txt_RData import pkl_txt_RData
+from pkl_txt_RData import pkl_to_RData_script
+import sys
 
 def main(fname=None, outdir=None, row_fname=None, col_fname=None):
   assert fname
@@ -10,7 +11,7 @@ def main(fname=None, outdir=None, row_fname=None, col_fname=None):
   J = json.load(open(fname))
   
   for d in J:
-    print pkl_txt_RData.main(pkl_fname=d['values'], row_fname=row_fname, col_fname=col_fname, outdir=outdir)
+    print pkl_to_RData_script.main(pkl_fname=d['values'], row_fname=row_fname, col_fname=col_fname, outdir=outdir)
 
 if __name__ == "__main__":
   args = dict([s.split('=') for s in sys.argv[1:]])
